@@ -5,6 +5,8 @@
 [![build](https://img.shields.io/github/workflow/status/BluePsyduck/ga4-measurement-protocol/CI?logo=github)](https://github.com/BluePsyduck/ga4-measurement-protocol/actions)
 [![Codecov](https://img.shields.io/codecov/c/gh/BluePsyduck/ga4-measurement-protocol?logo=codecov)](https://codecov.io/gh/BluePsyduck/ga4-measurement-protocol)
 
+This is a php 7.4 backport of https://github.com/BluePsyduck/ga4-measurement-protocol
+
 This library contains a small client able to send events through the Measurement Protocol to Google Analytics 4.
 
 Please always keep Google's warning about the current state of the API in mind when using this library:
