@@ -16,7 +16,7 @@ use Attribute;
 class Event
 {
     public function __construct(
-        public string $name,
+        string $name
     ) {
     }
 }

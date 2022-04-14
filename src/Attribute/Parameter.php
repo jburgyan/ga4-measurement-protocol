@@ -16,7 +16,7 @@ use Attribute;
 class Parameter
 {
     public function __construct(
-        public string $name,
+        string $name
     ) {
     }
 }
