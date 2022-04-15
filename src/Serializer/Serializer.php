@@ -96,6 +96,9 @@ class Serializer implements SerializerInterface
             } else {
                 $parameters[$attribute_name] = $this->transform($value);
             }
+            if (empty($parameters[$attribute_name])) {
+                unset($parameters[$attribute_name]);
+            }
         }
 
         return (object) array_filter($parameters, fn($v) => !is_null($v));
