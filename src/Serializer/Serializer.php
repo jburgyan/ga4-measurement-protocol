@@ -34,7 +34,7 @@ class Serializer implements SerializerInterface
      * @param mixed $value
      * @return mixed
      */
-    private function transform(mixed $value): mixed
+    private function transform($value)
     {
         if ($value instanceof EventInterface) {
             return $this->transformEvent($value);

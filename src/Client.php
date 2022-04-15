@@ -84,7 +84,7 @@ class Client implements ClientInterface
      * @param mixed $responseData
      * @return ValidateResponse
      */
-    private function createValidationResponse(mixed $responseData): ValidateResponse
+    private function createValidationResponse($responseData): ValidateResponse
     {
         $response = new ValidateResponse();
         if (is_array($responseData)) {
