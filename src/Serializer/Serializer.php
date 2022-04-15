@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace BluePsyduck\Ga4MeasurementProtocol\Serializer;
 
-use BluePsyduck\Ga4MeasurementProtocol\Attribute\Event;
-use BluePsyduck\Ga4MeasurementProtocol\Attribute\Parameter;
-use BluePsyduck\Ga4MeasurementProtocol\Attribute\ParameterArray;
 use BluePsyduck\Ga4MeasurementProtocol\Request\Event\EventInterface;
-use ReflectionAttribute;
 use ReflectionClass;
+use ReflectionException;
 
 /**
  * The class transforming the object structure into the data structure for GA.
@@ -23,6 +20,7 @@ class Serializer implements SerializerInterface
      * Serialized the provided object into the string for the GA request.
      * @param object $object
      * @return string
+     * @throws ReflectionException
      */
     public function serialize(object $object): string
     {
@@ -33,6 +31,7 @@ class Serializer implements SerializerInterface
      * Transforms the value into its data representation.
      * @param mixed $value
      * @return mixed
+     * @throws ReflectionException
      */
     private function transform($value)
     {
@@ -48,20 +47,26 @@ class Serializer implements SerializerInterface
         return $value;
     }
 
+    private function camelCase2UnderScore($str, $separator = "_")
+    {
+        if (empty($str)) {
+            return $str;
+        }
+        $str = lcfirst($str);
+        $str = preg_replace("/[A-Z]/", $separator . "$0", $str);
+        return strtolower($str);
+    }
+
     /**
      * Transforms the event into its data representation.
      * @param EventInterface $event
      * @return object
+     * @throws ReflectionException
      */
     private function transformEvent(EventInterface $event): object
     {
-        $eventName = '';
-
         $reflectedClass = new ReflectionClass($event);
-        $reflectedAttribute = $reflectedClass->getAttributes(Event::class)[0] ?? null;
-        if ($reflectedAttribute instanceof ReflectionAttribute) {
-            $eventName = $reflectedAttribute->newInstance()->name;
-        }
+        $eventName = str_replace('_event', '', $this->camelCase2UnderScore($reflectedClass->getShortName()));
 
         return (object) [
             'name' => $eventName,
@@ -73,6 +78,7 @@ class Serializer implements SerializerInterface
      * Extracts the parameters from the object, using the attached attributes.
      * @param object $object
      * @return object
+     * @throws ReflectionException
      */
     private function extractParameters(object $object): object
     {
@@ -80,17 +86,15 @@ class Serializer implements SerializerInterface
 
         $reflectedClass = new ReflectionClass($object);
         foreach ($reflectedClass->getProperties() as $reflectedProperty) {
-            foreach ($reflectedProperty->getAttributes() as $reflectedAttribute) {
-                $attribute = $reflectedAttribute->newInstance();
-                if ($attribute instanceof Parameter) {
-                    $parameters[$attribute->name] = $this->transform($reflectedProperty->getValue($object));
-                } elseif ($attribute instanceof ParameterArray) {
-                    $value = $reflectedProperty->getValue($object);
-                    $parameters[$attribute->name] = array_map(
-                        [$this, 'transform'],
-                        is_array($value) ? $value : [],
-                    );
-                }
+            $value = $reflectedProperty->getValue($object);
+            $attribute_name = $this->camelCase2UnderScore($reflectedProperty->getName());
+            if (is_array($value)) {
+                $parameters[$attribute_name] = array_map(
+                    [$this, 'transform'],
+                    is_array($value) ? $value : [],
+                );
+            } else {
+                $parameters[$attribute_name] = $this->transform($value);
             }
         }
 
