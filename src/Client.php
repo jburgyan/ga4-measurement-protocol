@@ -23,6 +23,12 @@ use Psr\Http\Message\StreamFactoryInterface;
  */
 class Client implements ClientInterface
 {
+    public HttpClientInterface $httpClient;
+    public RequestFactoryInterface $requestFactory;
+    public StreamFactoryInterface $streamFactory;
+    public SerializerInterface $serializer;
+    public Config $config;
+
     public function __construct(
         HttpClientInterface $httpClient,
         RequestFactoryInterface $requestFactory,
@@ -30,6 +36,11 @@ class Client implements ClientInterface
         SerializerInterface $serializer,
         Config $config
     ) {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->streamFactory = $streamFactory;
+        $this->serializer = $serializer;
+        $this->config = $config;
     }
 
     public function send(Payload $payload): void
@@ -45,8 +56,11 @@ class Client implements ClientInterface
 
         try {
             $responseData = json_decode(
-                $clientResponse->getBody()->getContents(), 
-                true, 512, JSON_THROW_ON_ERROR);
+                $clientResponse->getBody()->getContents(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
         } catch (JsonException $e) {
             throw new InvalidJsonResponseException($e->getMessage(), $e);
         }
