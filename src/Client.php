@@ -43,10 +43,15 @@ class Client implements ClientInterface
         $this->config = $config;
     }
 
-    public function send(Payload $payload): void
+    public function send(Payload $payload, $async = false): void
     {
         $request = $this->createRequest($this->config->sendUrl, $payload);
-        $this->httpClient->sendRequest($request);
+        //async requires guzzlehttp as client
+        if ($async && method_exists($this->httpClient, 'sendAsync')) {
+            $this->httpClient->sendAsync($request);
+        } else {
+            $this->httpClient->sendRequest($request);
+        }
     }
 
     public function validate(Payload $payload): ValidateResponse

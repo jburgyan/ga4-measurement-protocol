@@ -19,9 +19,10 @@ interface ClientInterface
     /**
      * Sends the payload to Google Analytics.
      * @param Payload $payload
+     * @param bool $async
      * @throws ClientExceptionInterface
      */
-    public function send(Payload $payload): void;
+    public function send(Payload $payload, $async = false): void;
 
     /**
      * Validates the payload against Google Analytics.
